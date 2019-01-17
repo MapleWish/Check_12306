@@ -11,16 +11,15 @@ req = requests.get("https://kyfw.12306.cn/otn/resources/js/framework/station_nam
 respond = re.findall(r'([\u4e00-\u9fa5]+)\|([A-Z]+)',req.text)
 list_1 = dict(respond)
 
-startstation_row = input("请输入起点: ")
-startstation = list_1[startstation_row]
-endstation_row = input("请输入终点: ")
-endstation = list_1[endstation_row]
+startstation = input("请输入起点: ")
+startstation = list_1[startstation]
+endstation = input("请输入终点: ")
+endstation = list_1[endstation]
 times = input("请输入时间 格式(2000-01-01): ")
 kind = input("请输入需要查询的车次类型(如G,D,Z,T,K)（默认全查）:")
 
 #通过API进行来获取Json数据
 url = "https://kyfw.12306.cn/otn/leftTicketPrice/query?leftTicketDTO.train_date=%s&leftTicketDTO.from_station=%s&leftTicketDTO.to_station=%s&purpose_codes=ADULT"%(times,startstation,endstation)
-#print(url)
 respond = requests.get(url)
 respond = respond.content.decode()
 respond = json.loads(respond)["data"]
@@ -52,10 +51,10 @@ for i in range(len(respond)):
     if(source["wz_price"]!="--"):
         source["wz_price"]=int(source["wz_price"])/10.0    
     
-    #通过输入的kind来确定需要添加内容,并且过滤停运车号
-    if((kind==''or source["station_train_code"][0]==kind) and source["lishi"]!="99:59" ):
+    #通过kind来确定需要添加内容
+    if(kind==''or source["station_train_code"][0]==kind):
     #Content
-        print([source["station_train_code"],
+        pt.add_row([source["station_train_code"],
                     source["from_station_name"],
                     source["to_station_name"],
                     source["start_time"],
@@ -72,14 +71,14 @@ for i in range(len(respond)):
                     source["yz_price"],
                     source["wz_price"]
                     ])
-
+print(pt)
 
 #调用Chrome浏览器进行访问
 flag = input("若需要跳转至购票页面,请输入Y: ")  
 if(flag == "Y"):
     ChromePath = r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'              
     webbrowser.register('Chrome', None, webbrowser.BackgroundBrowser(ChromePath)) 
-    webbrowser.get('Chrome').open('https://kyfw.12306.cn/otn/leftTicket/init?linktypeid=dc&fs=%s,%s&ts=%s,%s&date=%s&flag=N,N,Y'%(startstation_row,startstation,endstation_row,endstation,times),new=1,autoraise=True) 
+    webbrowser.get('Chrome').open('https://kyfw.12306.cn/otn/leftTicket/init?linktypeid=dc&fs=%s&ts=%s&date=%s&flag=N,N,Y'%(startstation,endstation,times),new=1,autoraise=True) 
 """ 
     车站号 station_train_code
     出发站 from_station_name
